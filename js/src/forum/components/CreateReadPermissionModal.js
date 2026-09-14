@@ -1,9 +1,9 @@
 import app from 'flarum/forum/app';
 
 import Button from 'flarum/common/components/Button';
+import Icon from 'flarum/common/components/Icon';
 import Modal from 'flarum/common/components/Modal';
 import Dropdown from 'flarum/common/components/Dropdown';
-import icon from 'flarum/common/helpers/icon';
 import Group from 'flarum/common/models/Group';
 
 export default class CreateReadPermissionModal extends Modal {
@@ -83,7 +83,9 @@ export default class CreateReadPermissionModal extends Modal {
   groupLabel(group, icons, includeIcon = true) {
     const label = [group.namePlural(), ' - ', this.permissionFor(group)];
 
-    return includeIcon ? [icon(group.icon() || icons[group.id()]), ' ', label] : label;
+    return includeIcon
+      ? [<Icon name={group.icon() || icons[group.id()]} />, ' ', label]
+      : label;
   }
 
   onsubmit(e) {
