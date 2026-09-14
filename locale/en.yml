@@ -1,21 +1,20 @@
 nodeloc-read-permission:
-  # For more details on the format
-  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    readPermission: permission
-    readPermissionHelper: 0 to All , the big , read more
+    readPermission: Read permission level
+    readPermissionHelper: Enter a number. The default is 0, which allows everyone to read.
 
   forum:
     modal:
-      add_title: Add permission
-      readPermission_placeholder: Choose permission
-      submit: Submit
+      add_title: Set read permission
+      readPermission_placeholder: Choose the minimum group level
+      no_groups: No groups available
+      submit: Confirm
     composer_discussion:
-      add_readPermission: Add permission
-      edit_readPermission: Edit permission
+      add_readPermission: Set read permission
+      edit_readPermission: Edit read permission
     tooltip:
-      badge: Permission
+      badge: Read permission level {permission} or higher
 
-    read-failed: Failed
-    read-failed-detail: You have no permission to read this discussion. Lowest permission -
-    low-permission: You don't have enough permission.
+    read-failed: Read permission required
+    read-failed-detail: You do not have permission to read this discussion. Required level: {permission}
+    low-permission: You do not have enough read permission (level {permission} required).

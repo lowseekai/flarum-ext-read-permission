@@ -1,20 +1,19 @@
 nodeloc-read-permission:
-  # For more details on the format
-  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    readPermission: 阅读权限
-    readPermissionHelper: 填写数字, 默认0, 用户(组)阅读权限需要大于等于填写数字
+    readPermission: 阅读权限等级
+    readPermissionHelper: 填写数字，默认 0。用户所属群组的最高等级达到此数值后才能阅读。
 
   forum:
     modal:
       add_title: 设置阅读权限
-      readPermission_placeholder: 选择阅读权限
-      submit: 提交
+      readPermission_placeholder: 选择允许阅读的群组
+      no_groups: 没有可用的群组
+      submit: 确定
     composer_discussion:
-      add_readPermission: 增加权限
-      edit_readPermission: 编辑权限
+      add_readPermission: 设置阅读权限
+      edit_readPermission: 修改阅读权限
     tooltip:
-      badge: 权限
-    read-failed: 阅读提示
-    read-failed-detail: 抱歉，你没有权限阅读此话题。最低权限 -
-    low-permission: 您没有足够的权限.
+      badge: 阅读权限等级至少为 {permission}
+    read-failed: 暂无阅读权限
+    read-failed-detail: 抱歉，你没有权限阅读此话题。所需阅读权限等级：{permission}
+    low-permission: 你没有足够的阅读权限（需要等级 {permission}）。

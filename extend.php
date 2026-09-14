@@ -11,43 +11,65 @@
 
 namespace Nodeloc\ReadPermission;
 
-use Flarum\Api\Serializer\CurrentUserSerializer;
-use Flarum\Api\Serializer\GroupSerializer;
-use Flarum\Api\Serializer\DiscussionSerializer;
-use Flarum\Api\Serializer\PostSerializer;
+use Flarum\Api\Context;
+use Flarum\Api\Resource;
+use Flarum\Api\Schema;
 use Flarum\Extend;
 use Flarum\Group\Group;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\Post;
+use Flarum\User\User;
 
 return [
     (new Extend\Frontend('forum'))
-        ->js(__DIR__ . '/js/dist/forum.js')
-        ->css(__DIR__ . '/less/forum.less'),
+        ->js(__DIR__.'/js/dist/forum.js')
+        ->css(__DIR__.'/less/forum.less'),
     (new Extend\Frontend('admin'))
-        ->js(__DIR__ . '/js/dist/admin.js')
-        ->css(__DIR__ . '/less/admin.less'),
+        ->js(__DIR__.'/js/dist/admin.js')
+        ->css(__DIR__.'/less/admin.less'),
     new Extend\Locales(__DIR__ . '/locale'),
     (new Extend\Event())
         ->listen(\Flarum\Group\Event\Saving::class, Listeners\SaveReadPermissionToDatabase::class)
         ->listen(\Flarum\Discussion\Event\Saving::class, Listeners\SaveReadPermissionToDiscussion::class),
-    (new Extend\ApiSerializer(GroupSerializer::class))
-        ->attribute('readPermission', function (GroupSerializer $serializer, Group $group) {
-            return $group->read_permission;
-        }),
-    
-    (new Extend\ApiSerializer(DiscussionSerializer::class))
-        ->attribute('readPermission', function (DiscussionSerializer $serializer, $model) {
-            return $model->read_permission;
-        }),
+    (new Extend\ApiResource(Resource\GroupResource::class))
+        ->fields(fn () => [
+            Schema\Integer::make('readPermission')
+                ->property('read_permission')
+                ->get(fn (Group $group): int => (int) ($group->read_permission ?? 0))
+                ->writable()
+                ->set(function (Group $group, $value): void {
+                    $group->read_permission = max(0, (int) ($value ?? 0));
+                }),
+        ]),
+    (new Extend\ApiResource(Resource\DiscussionResource::class))
+        ->fields(fn () => [
+            Schema\Integer::make('readPermission')
+                ->property('read_permission')
+                ->get(fn (Discussion $discussion): int => (int) ($discussion->read_permission ?? 0))
+                ->writable(function (Discussion $discussion, Context $context): bool {
+                    return $context->creating() || $context->getActor()->can('rename', $discussion);
+                })
+                ->set(function (Discussion $discussion, $value): void {
+                    $discussion->read_permission = max(0, (int) ($value ?? 0));
+                }),
+        ]),
+    (new Extend\ApiResource(Resource\PostResource::class))
+        ->fields(fn () => [
+            Schema\Integer::make('readPermission')
+                ->get(fn (Post $post): int => (int) ($post->discussion?->read_permission ?? 0)),
+        ]),
+    (new Extend\ApiResource(Resource\UserResource::class))
+        ->fields(fn () => [
+            Schema\Integer::make('readPermission')
+                ->visible(fn (User $user, Context $context): bool => $context->getActor()->id === $user->id)
+                ->get(function (User $user): int {
+                    $groups = $user->relationLoaded('groups')
+                        ? $user->groups
+                        : $user->groups()->get();
 
-    (new Extend\ApiSerializer(PostSerializer::class))
-        ->attribute('readPermission', function (PostSerializer $serializer, Post $post) {
-            return $post->discussion->read_permission;
-        }),
-
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(Attributes\ReadPermissionAttribute::class),
+                    return (int) ($groups->max('read_permission') ?? 0);
+                }),
+        ]),
 
     (new Extend\Settings())
         ->default('nodeloc-read-permission.group', Group::MEMBER_ID),

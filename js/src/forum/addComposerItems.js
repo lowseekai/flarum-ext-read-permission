@@ -1,41 +1,46 @@
 import app from 'flarum/forum/app';
-
-import { extend } from 'flarum/common/extend';
+import {extend} from 'flarum/common/extend';
 import classList from 'flarum/common/utils/classList';
-import DiscussionComposer from 'flarum/forum/components/DiscussionComposer';
-
 import CreateReadPermissionModal from './components/CreateReadPermissionModal';
 
-export const addToComposer = (composer) => {
-  composer.prototype.addReadPermission = function () {
-    app.modal.show(CreateReadPermissionModal, {
-      selectGroup: this.composer.fields.selectGroup,
-      onsubmit: (selectGroup) => (this.composer.fields.selectGroup = selectGroup),
-    });
-  };
+export default () => {
+  const componentPath = 'flarum/forum/components/DiscussionComposer';
 
-  // Add button to DiscussionComposer header
-  extend(composer.prototype, 'headerItems', function (items) {
-    const discussion = this.composer.body?.attrs?.discussion;
+  extend(componentPath, 'oninit', function () {
+    this.addReadPermission = () => {
+      app.modal.show(CreateReadPermissionModal, {
+        selectGroup: this.composer.fields.selectGroup,
+        onsubmit: (selectGroup) => {
+          this.composer.fields.selectGroup = selectGroup;
+        },
+      });
+    };
+  });
+
+  extend(componentPath, 'headerItems', function (items) {
+    const selectedGroup = this.composer.fields.selectGroup;
+    const labelKey = selectedGroup ? 'edit' : 'add';
+
     items.add(
       'readPermission',
-      <a className="ComposerBody-readPermission" onclick={this.addReadPermission.bind(this)}>
-        <span className={classList('readPermissionLabel', !this.composer.fields.selectGroup && 'none')}>
-          {app.translator.trans(`nodeloc-read-permission.forum.composer_discussion.${this.composer.fields.selectGroup ? 'edit' : 'add'}_readPermission`)}
+      <button
+        type="button"
+        className="Button Button--link ComposerBody-readPermission"
+        onclick={this.addReadPermission}
+      >
+        <span className={classList('readPermissionLabel', !selectedGroup && 'none')}>
+          {app.translator.trans(`nodeloc-read-permission.forum.composer_discussion.${labelKey}_readPermission`)}
         </span>
-      </a>,
+      </button>,
       4
     );
-
   });
 
-  extend(composer.prototype, 'data', function (data) {
-    if (this.composer.fields.selectGroup) {
-      data.readPermission = this.composer.fields.selectGroup.data.attributes.readPermission;
+  extend(componentPath, 'data', function (data) {
+    const selectedGroup = this.composer.fields.selectGroup;
+
+    if (selectedGroup) {
+      data.readPermission = Number(selectedGroup.attribute('readPermission') ?? 0);
     }
   });
-};
-
-export default () => {
-  addToComposer(DiscussionComposer);
 };

@@ -3,17 +3,17 @@
 namespace Nodeloc\ReadPermission\Listeners;
 
 use Flarum\Discussion\Event\Saving;
+use Illuminate\Support\Arr;
 
 class SaveReadPermissionToDiscussion
 {
-     /**
-     * @param Saving $event
-     */
     public function handle(Saving $event)
     {
-        if (isset($event->data['attributes']['readPermission'])) {
-            $discussion = $event->discussion;
-            $discussion->read_permission = $event->data['attributes']['readPermission'];
+        if (Arr::has($event->data, 'attributes.readPermission')) {
+            $event->discussion->read_permission = max(
+                0,
+                (int) (Arr::get($event->data, 'attributes.readPermission') ?? 0)
+            );
         }
     }
 }
