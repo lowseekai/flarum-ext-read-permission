@@ -16,5 +16,5 @@ nodeloc-read-permission:
       badge: Read permission level {permission} or higher
 
     read-failed: Read permission required
-    read-failed-detail: You do not have permission to read this discussion. Required level: {permission}
+    read-failed-detail: "You do not have permission to read this discussion. Required level: {permission}"
     low-permission: You do not have enough read permission (level {permission} required).
