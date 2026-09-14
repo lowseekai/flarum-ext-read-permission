@@ -10,8 +10,8 @@ nodeloc-read-permission:
       no_groups: 没有可用的群组
       submit: 确定
     composer_discussion:
-      add_readPermission: 设置阅读权限
-      edit_readPermission: 修改阅读权限
+      add_readPermission: 阅读权限
+      edit_readPermission: 阅读权限
     tooltip:
       badge: 阅读权限等级至少为 {permission}
     read-failed: 暂无阅读权限

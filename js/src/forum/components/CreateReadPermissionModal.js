@@ -66,9 +66,10 @@ export default class CreateReadPermissionModal extends Modal {
       </div>,
       <div className="Form-group">
         <Button
-          type="submit"
+          type="button"
           className="Button Button--primary ReadPermissionModal-SubmitButton"
           loading={this.loading}
+          onclick={this.onsubmit.bind(this)}
         >
           {app.translator.trans('nodeloc-read-permission.forum.modal.submit')}
         </Button>
