@@ -26,7 +26,7 @@ export default class CreateReadPermissionModal extends Modal {
   content() {
     return [
       <div className="Modal-body">
-        <div className="ReadPermissionDiscussionModal-form">{this.fields().toArray()}</div>
+        <div className="ReadPermissionDiscussionModal-form">{this.fields()}</div>
       </div>,
     ];
   }
