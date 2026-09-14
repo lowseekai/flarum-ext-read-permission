@@ -108,7 +108,7 @@ export default class CreateReadPermissionModal extends Modal {
         this.loaded();
       });
     } else {
-      app.modal.close();
+      this.hide();
     }
   }
 }
