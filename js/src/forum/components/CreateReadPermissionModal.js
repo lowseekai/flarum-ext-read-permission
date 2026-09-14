@@ -57,6 +57,7 @@ export default class CreateReadPermissionModal extends Modal {
               icon={group.icon() || icons[group.id()]}
               onclick={() => {
                 this.group = group;
+                m.redraw();
               }}
             >
               {this.groupLabel(group, icons, false)}
