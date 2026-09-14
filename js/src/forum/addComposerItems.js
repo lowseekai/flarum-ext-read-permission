@@ -3,7 +3,10 @@ import {extend} from 'flarum/common/extend';
 import classList from 'flarum/common/utils/classList';
 import CreateReadPermissionModal from './components/CreateReadPermissionModal';
 
-function showReadPermissionModal(composer) {
+function showReadPermissionModal(composer, event) {
+  event?.preventDefault();
+  event?.stopPropagation();
+
   app.modal.show(CreateReadPermissionModal, {
     selectGroup: composer.fields.selectGroup,
     onsubmit: (selectGroup) => {
@@ -16,7 +19,7 @@ export default () => {
   const componentPath = 'flarum/forum/components/DiscussionComposer';
 
   extend(componentPath, 'oninit', function () {
-    this.addReadPermission = () => showReadPermissionModal(this.composer);
+    this.addReadPermission = (event) => showReadPermissionModal(this.composer, event);
   });
 
   extend(componentPath, 'headerItems', function (items) {
@@ -28,7 +31,7 @@ export default () => {
       <button
         type="button"
         className="Button Button--link ComposerBody-readPermission"
-        onclick={() => showReadPermissionModal(this.composer)}
+        onclick={(event) => showReadPermissionModal(this.composer, event)}
       >
         <span className={classList('readPermissionLabel', !selectedGroup && 'none')}>
           {app.translator.trans(`nodeloc-read-permission.forum.composer_discussion.${labelKey}_readPermission`)}

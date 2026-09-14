@@ -91,6 +91,7 @@ export default class CreateReadPermissionModal extends Modal {
 
   onsubmit(e) {
     e?.preventDefault();
+    e?.stopPropagation();
 
     const data = this.group;
 
