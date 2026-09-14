@@ -90,25 +90,34 @@ export default class CreateReadPermissionModal extends Modal {
   }
 
   onsubmit(e) {
-    e.preventDefault();
+    e?.preventDefault();
 
     const data = this.group;
 
     if (!data) {
       return;
     }
-    const promise = this.attrs.onsubmit(data);
+    try {
+      const result = this.attrs.onsubmit(data);
 
-    if (promise instanceof Promise) {
+      if (!result || typeof result.then !== 'function') {
+        this.hide();
+        return;
+      }
+
       this.loading = true;
-
-      promise.then(this.hide.bind(this), (err) => {
-        console.error(err);
-        this.onerror(err);
-        this.loaded();
-      });
-    } else {
-      this.hide();
+      Promise.resolve(result).then(
+        () => this.hide(),
+        (err) => {
+          console.error(err);
+          this.onerror(err);
+          this.loaded();
+        }
+      );
+    } catch (err) {
+      console.error(err);
+      this.onerror(err);
+      this.loaded();
     }
   }
 }
