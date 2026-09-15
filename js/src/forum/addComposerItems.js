@@ -8,15 +8,28 @@ function permissionForGroup(group) {
 }
 
 function findChildByClassName(vnode, className) {
-  if (!vnode || !Array.isArray(vnode.children)) {
+  if (!vnode) {
+    return null;
+  }
+
+  const classes = vnode?.attrs?.className;
+
+  if (typeof classes === 'string' && classes.split(/\s+/).includes(className)) {
+    return vnode;
+  }
+
+  if (!Array.isArray(vnode.children)) {
     return null;
   }
 
   return (
     vnode.children.find((child) => {
-      const classes = child?.attrs?.className;
+      const childClasses = child?.attrs?.className;
 
-      return typeof classes === 'string' && classes.split(/\s+/).includes(className);
+      return (
+        typeof childClasses === 'string' &&
+        childClasses.split(/\s+/).includes(className)
+      );
     }) ?? null
   );
 }
