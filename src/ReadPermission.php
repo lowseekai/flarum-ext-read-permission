@@ -5,6 +5,7 @@ namespace Nodeloc\ReadPermission;
 use Flarum\Discussion\Discussion;
 use Flarum\User\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 final class ReadPermission
 {
@@ -45,11 +46,11 @@ final class ReadPermission
 
         $level = self::userLevel($user);
 
-        $query->whereIn('posts.discussion_id', function (Builder $discussionQuery) use ($user, $level): void {
+        $query->whereIn('posts.discussion_id', function (QueryBuilder $discussionQuery) use ($user, $level): void {
             $discussionQuery
                 ->select('discussions.id')
                 ->from('discussions')
-                ->where(function (Builder $permissionQuery) use ($user, $level): void {
+                ->where(function (QueryBuilder $permissionQuery) use ($user, $level): void {
                     $permissionQuery
                         ->whereNull('discussions.read_permission')
                         ->orWhere('discussions.read_permission', '<=', $level);
