@@ -7,6 +7,20 @@ function permissionForGroup(group) {
   return Number(group?.attribute('readPermission') ?? group?.data?.attributes?.readPermission ?? 0);
 }
 
+function findChildByClassName(vnode, className) {
+  if (!vnode || !Array.isArray(vnode.children)) {
+    return null;
+  }
+
+  return (
+    vnode.children.find((child) => {
+      const classes = child?.attrs?.className;
+
+      return typeof classes === 'string' && classes.split(/\s+/).includes(className);
+    }) ?? null
+  );
+}
+
 function showReadPermissionModal(composer, event) {
   event?.preventDefault();
   event?.stopPropagation();
@@ -51,16 +65,27 @@ export default () => {
       4
     );
 
-    if (selectedGroup) {
-      items.add(
-        'readPermissionHint',
-        <div className="ReadPermissionComposerHint" role="status">
-          <Icon name="fas fa-circle-info" />
-          <span>{app.translator.trans('nodeloc-read-permission.forum.composer_discussion.hint')}</span>
-        </div>,
-        -10
-      );
+  });
+
+  extend(componentPath, 'view', function (vnode) {
+    if (!this.composer.fields.selectGroup) {
+      return;
     }
+
+    const body = findChildByClassName(vnode?.children?.[0], 'ComposerBody');
+    const content = findChildByClassName(body, 'ComposerBody-content');
+    const editor = findChildByClassName(content, 'ComposerBody-editor');
+
+    if (!Array.isArray(content?.children) || !editor) {
+      return;
+    }
+
+    content.children.splice(content.children.indexOf(editor), 0, (
+      <div key="read-permission-hint" className="ReadPermissionComposerHint" role="status">
+        <Icon name="fas fa-circle-info" />
+        <span>{app.translator.trans('nodeloc-read-permission.forum.composer_discussion.editing_hint')}</span>
+      </div>
+    ));
   });
 
   extend(componentPath, 'data', function (data) {

@@ -12,13 +12,16 @@
 namespace Nodeloc\ReadPermission;
 
 use Flarum\Api\Context;
+use Flarum\Api\Endpoint;
 use Flarum\Api\Resource;
 use Flarum\Api\Schema;
 use Flarum\Extend;
 use Flarum\Group\Group;
 use Flarum\Discussion\Discussion;
+use Flarum\Post\CommentPost;
 use Flarum\Post\Post;
 use Flarum\User\User;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 return [
     (new Extend\Frontend('forum'))
@@ -33,6 +36,33 @@ return [
         ->listen(\Flarum\Discussion\Event\Saving::class, Listeners\SaveReadPermissionToDiscussion::class),
     (new Extend\ModelVisibility(Post::class))
         ->scope(ReadPermission::scopePosts(...)),
+    (new Extend\ApiResource(Resource\DiscussionResource::class))
+        ->field(['firstPost', 'lastPost', 'mostRelevantPost'], function ($field) {
+            return $field->scope(function (Relation $relation, Context $context): void {
+                ReadPermission::scopePosts($context->getActor(), $relation->getQuery());
+            });
+        })
+        ->endpoint(Endpoint\Show::class, function (Endpoint\Show $endpoint): Endpoint\Show {
+            return $endpoint
+                ->eagerLoadWhere('firstPost', fn (Relation $relation, Context $context) => $relation->getQuery()->whereVisibleTo($context->getActor()))
+                ->eagerLoadWhere('lastPost', fn (Relation $relation, Context $context) => $relation->getQuery()->whereVisibleTo($context->getActor()));
+        })
+        ->endpoint(Endpoint\Index::class, function (Endpoint\Index $endpoint): Endpoint\Index {
+            return $endpoint
+                ->eagerLoadWhere('mostRelevantPost', fn (Relation $relation, Context $context) => $relation->getQuery()->whereVisibleTo($context->getActor()));
+        })
+        ->endpoint(Endpoint\Create::class, function (Endpoint\Create $endpoint): Endpoint\Create {
+            return $endpoint
+                ->eagerLoadWhere('firstPost', fn (Relation $relation, Context $context) => $relation->getQuery()->whereVisibleTo($context->getActor()))
+                ->eagerLoadWhere('lastPost', fn (Relation $relation, Context $context) => $relation->getQuery()->whereVisibleTo($context->getActor()));
+        }),
+    (new Extend\ApiResource(Resource\PostResource::class))
+        ->field('contentHtml', function ($field) {
+            return $field->visible(function (Post $post, Context $context): bool {
+                return $post instanceof CommentPost
+                    && ReadPermission::canReadPost($post, $context->getActor());
+            });
+        }),
     (new Extend\ApiResource(Resource\GroupResource::class))
         ->fields(fn () => [
             Schema\Integer::make('readPermission')

@@ -1,5 +1,4 @@
 .ComposerBody-readPermission {
-  margin-right: 4px;
   line-height: inherit;
   vertical-align: middle;
 
@@ -27,22 +26,33 @@
 }
 
 .ComposerBody-header {
+  > li {
+    vertical-align: middle;
+  }
+
   > .item-tags,
   > .item-readPermission,
   > .item-lottery {
     margin-left: 0;
-    margin-right: -4px;
+    margin-right: 2px;
   }
 
   .DiscussionComposer-changeTags,
+  .ComposerBody-readPermission,
   .ComposerBody-lottery {
-    margin-right: 4px;
+    margin-right: 0;
+    line-height: inherit;
   }
 
-  > .item-readPermissionHint {
-    display: block;
-    width: 100%;
-    margin: 8px 0 10px;
+  .ReadPermissionLabel,
+  .LotteryLabel {
+    font-size: 85%;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.1em 0.5em;
+    border-radius: var(--border-radius);
+    text-transform: none;
+    white-space: nowrap;
   }
 }
 

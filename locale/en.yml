@@ -13,7 +13,8 @@ nodeloc-read-permission:
     composer_discussion:
       add_readPermission: Set read permission
       edit_readPermission: Edit read permission
-      hint: You are editing the read permission. Continue entering the discussion content.
+      hint: Read permission set
+      editing_hint: You are editing the read permission. Continue entering the discussion content.
     tooltip:
       badge: Read permission level {permission} or higher
 

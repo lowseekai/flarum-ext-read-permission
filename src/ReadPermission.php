@@ -3,6 +3,7 @@
 namespace Nodeloc\ReadPermission;
 
 use Flarum\Discussion\Discussion;
+use Flarum\Post\Post;
 use Flarum\User\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -30,6 +31,16 @@ final class ReadPermission
 
         return $discussion->user_id === $user->id
             || self::userLevel($user) >= (int) $discussion->read_permission;
+    }
+
+    public static function canReadPost(Post $post, User $user): bool
+    {
+        $discussion = $post->relationLoaded('discussion')
+            ? $post->getRelation('discussion')
+            : Discussion::query()->find($post->discussion_id);
+
+        return $discussion instanceof Discussion
+            && self::canRead($discussion, $user);
     }
 
     /**

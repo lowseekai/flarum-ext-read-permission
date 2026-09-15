@@ -13,7 +13,8 @@ nodeloc-read-permission:
     composer_discussion:
       add_readPermission: 阅读权限
       edit_readPermission: 编辑权限
-      hint: 当前正在编辑阅读权限，请继续输入正文内容
+      hint: 已设置阅读权限
+      editing_hint: 当前正在编辑阅读权限，请继续输入正文内容
     tooltip:
       badge: 阅读权限等级至少为 {permission}
     read-failed: 暂无阅读权限
