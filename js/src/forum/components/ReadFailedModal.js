@@ -5,6 +5,10 @@ export default class ReadFailedModal extends Modal {
   oninit(vnode) {
     super.oninit(vnode);
     this.readPermission = Number(this.attrs.readPermission || 0);
+    this.group = app.store
+      .all('groups')
+      .filter((group) => Number(group.attribute('readPermission') ?? group.data?.attributes?.readPermission ?? 0) === this.readPermission)
+      .sort((a, b) => a.namePlural().localeCompare(b.namePlural()))[0];
   }
 
   className() {
@@ -16,12 +20,16 @@ export default class ReadFailedModal extends Modal {
   }
 
   content() {
+    const groupName = this.group?.namePlural();
+
     return (
       <div className="Modal-body">
         <div className="modalText">
-          {app.translator.trans('nodeloc-read-permission.forum.read-failed-detail', {
-            permission: this.readPermission,
-          })}
+          {groupName
+            ? app.translator.trans('nodeloc-read-permission.forum.read-failed-detail', {
+                group: groupName,
+              })
+            : app.translator.trans('nodeloc-read-permission.forum.read-failed-detail-unknown')}
         </div>
       </div>
     );

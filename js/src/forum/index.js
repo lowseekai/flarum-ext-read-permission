@@ -19,6 +19,18 @@ function userPermission(user) {
   return Number(user?.attribute('readPermission') || 0);
 }
 
+function groupNameForPermission(permission) {
+  return app.store
+    .all('groups')
+    .filter(
+      (group) =>
+        Number(group.attribute('readPermission') ?? group.data?.attributes?.readPermission ?? 0) ===
+        permission
+    )
+    .sort((a, b) => a.namePlural().localeCompare(b.namePlural()))[0]
+    ?.namePlural();
+}
+
 function isDiscussionOwner(discussion, user) {
   const owner = discussion?.user();
   return !!(owner && user && owner.id() === user.id());
@@ -64,6 +76,8 @@ function blockedDiscussionView(component, discussion) {
 }
 
 function blockedPageView(discussion) {
+  const groupName = groupNameForPermission(requiredPermission(discussion));
+
   return (
     <div className="DiscussionPage ReadPermission-blockedPage">
       <div className="DiscussionPage-discussion">
@@ -72,9 +86,11 @@ function blockedPageView(discussion) {
             <ul className="DiscussionHero-items">
               <li className="item-title">
                 <h1 className="DiscussionHero-title">
-                  {app.translator.trans('nodeloc-read-permission.forum.low-permission', {
-                    permission: requiredPermission(discussion),
-                  })}
+                  {groupName
+                    ? app.translator.trans('nodeloc-read-permission.forum.low-permission', {
+                        group: groupName,
+                      })
+                    : app.translator.trans('nodeloc-read-permission.forum.low-permission-unknown')}
                 </h1>
               </li>
             </ul>
@@ -94,14 +110,20 @@ app.initializers.add('nodeloc/flarum-ext-read-permission', () => {
     const permission = requiredPermission(this);
 
     if (permission > 0) {
+      const groupName = groupNameForPermission(permission);
+
       badges.add(
         'readPermission',
         <Badge
           type="readPermission"
           icon="fas fa-eye-slash"
-          label={app.translator.trans('nodeloc-read-permission.forum.tooltip.badge', {
-            permission,
-          })}
+          label={
+            groupName
+              ? app.translator.trans('nodeloc-read-permission.forum.tooltip.badge', {
+                  group: groupName,
+                })
+              : app.translator.trans('nodeloc-read-permission.forum.tooltip.badge-unknown')
+          }
         />,
         5
       );
@@ -133,11 +155,15 @@ app.initializers.add('nodeloc/flarum-ext-read-permission', () => {
     const discussion = post?.discussion();
 
     if (discussion && !canReadDiscussion(discussion)) {
+      const groupName = groupNameForPermission(requiredPermission(discussion));
+
       return (
         <div className="Post-body ReadPermission-blockedPost">
-          {app.translator.trans('nodeloc-read-permission.forum.low-permission', {
-            permission: requiredPermission(discussion),
-          })}
+          {groupName
+            ? app.translator.trans('nodeloc-read-permission.forum.low-permission', {
+                group: groupName,
+              })
+            : app.translator.trans('nodeloc-read-permission.forum.low-permission-unknown')}
         </div>
       );
     }

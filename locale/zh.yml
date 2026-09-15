@@ -16,7 +16,10 @@ nodeloc-read-permission:
       hint: 已设置阅读权限
       editing_hint: 当前正在编辑阅读权限，请继续输入正文内容
     tooltip:
-      badge: 阅读权限等级至少为 {permission}
+      badge: 阅读权限：{group}
+      badge-unknown: 需要相应用户组才能阅读
     read-failed: 暂无阅读权限
-    read-failed-detail: 抱歉，你没有权限阅读此话题。所需阅读权限等级：{permission}
-    low-permission: 你没有足够的阅读权限（需要等级 {permission}）。
+    read-failed-detail: 抱歉，你没有权限阅读此话题。所需用户组：{group}
+    read-failed-detail-unknown: 抱歉，你没有权限阅读此话题。需要加入相应用户组。
+    low-permission: 你没有足够的阅读权限（需要用户组：{group}）。
+    low-permission-unknown: 你没有足够的阅读权限（需要加入相应用户组）。
