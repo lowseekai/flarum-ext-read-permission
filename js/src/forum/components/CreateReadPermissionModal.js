@@ -16,7 +16,9 @@ export default class CreateReadPermissionModal extends Modal {
   }
 
   title() {
-    return app.translator.trans('nodeloc-read-permission.forum.modal.add_title');
+    return app.translator.trans(
+      `nodeloc-read-permission.forum.modal.${this.attrs.selectGroup ? 'edit' : 'add'}_title`
+    );
   }
 
   className() {

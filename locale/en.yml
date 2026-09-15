@@ -6,12 +6,14 @@ nodeloc-read-permission:
   forum:
     modal:
       add_title: Set read permission
+      edit_title: Edit read permission
       readPermission_placeholder: Choose the minimum group level
       no_groups: No groups available
       submit: Confirm
     composer_discussion:
       add_readPermission: Set read permission
       edit_readPermission: Edit read permission
+      hint: You are editing the read permission. Continue entering the discussion content.
     tooltip:
       badge: Read permission level {permission} or higher
 

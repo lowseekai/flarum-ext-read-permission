@@ -31,6 +31,8 @@ return [
     (new Extend\Event())
         ->listen(\Flarum\Group\Event\Saving::class, Listeners\SaveReadPermissionToDatabase::class)
         ->listen(\Flarum\Discussion\Event\Saving::class, Listeners\SaveReadPermissionToDiscussion::class),
+    (new Extend\ModelVisibility(Post::class))
+        ->scope(ReadPermission::scopePosts(...)),
     (new Extend\ApiResource(Resource\GroupResource::class))
         ->fields(fn () => [
             Schema\Integer::make('readPermission')

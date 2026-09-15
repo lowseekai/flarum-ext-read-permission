@@ -1,7 +1,9 @@
 .ComposerBody-readPermission {
-  margin-right: 6px;
+  margin-right: 4px;
+  line-height: inherit;
+  vertical-align: middle;
 
-  .readPermissionLabel {
+  .ReadPermissionLabel {
     font-size: 85%;
     font-weight: 600;
     display: inline-block;
@@ -17,6 +19,10 @@
       border: 1px dotted var(--muted-color);
       color: var(--muted-color);
     }
+
+    .icon {
+      margin-right: 2px;
+    }
   }
 }
 
@@ -24,7 +30,37 @@
   > .item-tags,
   > .item-readPermission,
   > .item-lottery {
-    margin-left: 6px;
+    margin-left: 0;
+    margin-right: -4px;
+  }
+
+  .DiscussionComposer-changeTags,
+  .ComposerBody-lottery {
+    margin-right: 4px;
+  }
+
+  > .item-readPermissionHint {
+    display: block;
+    width: 100%;
+    margin: 8px 0 10px;
+  }
+}
+
+.ReadPermissionComposerHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-left: 3px solid #e0a800;
+  border-radius: var(--border-radius);
+  background: #fff3cd;
+  color: #664d03;
+  font-size: 13px;
+
+  .icon {
+    flex: 0 0 auto;
   }
 }
 

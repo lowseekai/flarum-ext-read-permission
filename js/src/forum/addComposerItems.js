@@ -1,7 +1,11 @@
 import app from 'flarum/forum/app';
 import {extend} from 'flarum/common/extend';
-import classList from 'flarum/common/utils/classList';
+import Icon from 'flarum/common/components/Icon';
 import CreateReadPermissionModal from './components/CreateReadPermissionModal';
+
+function permissionForGroup(group) {
+  return Number(group?.attribute('readPermission') ?? group?.data?.attributes?.readPermission ?? 0);
+}
 
 function showReadPermissionModal(composer, event) {
   event?.preventDefault();
@@ -11,6 +15,7 @@ function showReadPermissionModal(composer, event) {
     selectGroup: composer.fields.selectGroup,
     onsubmit: (selectGroup) => {
       composer.fields.selectGroup = selectGroup;
+      composer.fields.readPermission = permissionForGroup(selectGroup);
       m.redraw();
     },
   });
@@ -20,6 +25,10 @@ export default () => {
   const componentPath = 'flarum/forum/components/DiscussionComposer';
 
   extend(componentPath, 'oninit', function () {
+    if (!Object.prototype.hasOwnProperty.call(this.composer.fields, 'readPermission')) {
+      this.composer.fields.readPermission = null;
+    }
+
     this.addReadPermission = (event) => showReadPermissionModal(this.composer, event);
   });
 
@@ -31,22 +40,36 @@ export default () => {
       'readPermission',
       <button
         type="button"
-        className="Button Button--link ComposerBody-readPermission"
+        className="Button Button--ua-reset ComposerBody-readPermission"
         onclick={(event) => showReadPermissionModal(this.composer, event)}
       >
-        <span className={classList('readPermissionLabel', !selectedGroup && 'none')}>
+        <span className={selectedGroup ? 'ReadPermissionLabel' : 'ReadPermissionLabel none'}>
+          <Icon name="fas fa-eye-slash" />
           {app.translator.trans(`nodeloc-read-permission.forum.composer_discussion.${labelKey}_readPermission`)}
         </span>
       </button>,
       4
     );
+
+    if (selectedGroup) {
+      items.add(
+        'readPermissionHint',
+        <div className="ReadPermissionComposerHint" role="status">
+          <Icon name="fas fa-circle-info" />
+          <span>{app.translator.trans('nodeloc-read-permission.forum.composer_discussion.hint')}</span>
+        </div>,
+        -10
+      );
+    }
   });
 
   extend(componentPath, 'data', function (data) {
     const selectedGroup = this.composer.fields.selectGroup;
 
     if (selectedGroup) {
-      data.readPermission = Number(selectedGroup.attribute('readPermission') ?? 0);
+      data.readPermission = Number(
+        this.composer.fields.readPermission ?? permissionForGroup(selectedGroup)
+      );
     }
   });
 };
