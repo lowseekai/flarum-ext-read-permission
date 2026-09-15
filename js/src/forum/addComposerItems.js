@@ -11,6 +11,7 @@ function showReadPermissionModal(composer, event) {
     selectGroup: composer.fields.selectGroup,
     onsubmit: (selectGroup) => {
       composer.fields.selectGroup = selectGroup;
+      m.redraw();
     },
   });
 }
