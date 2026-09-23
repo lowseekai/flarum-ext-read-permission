@@ -1,7 +1,8 @@
 .ComposerBody-readPermission {
-  margin-right: 15px;
+  line-height: inherit;
+  vertical-align: middle;
 
-  .readPermissionLabel {
+  .ReadPermissionLabel {
     font-size: 85%;
     font-weight: 600;
     display: inline-block;
@@ -17,8 +18,68 @@
       border: 1px dotted var(--muted-color);
       color: var(--muted-color);
     }
+
+    .icon {
+      margin-right: 2px;
+    }
   }
 }
+
+.ComposerBody-header {
+  > li {
+    vertical-align: middle;
+  }
+
+  > .item-tags,
+  > .item-readPermission,
+  > .item-lottery {
+    margin-left: 0;
+    margin-right: 2px;
+  }
+
+  .DiscussionComposer-changeTags,
+  .ComposerBody-readPermission,
+  .ComposerBody-lottery {
+    margin-right: 0;
+    line-height: inherit;
+  }
+
+  .ReadPermissionLabel,
+  .LotteryLabel {
+    font-size: 85%;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.1em 0.5em;
+    border-radius: var(--border-radius);
+    text-transform: none;
+    white-space: nowrap;
+  }
+}
+
+.ReadPermissionComposerHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-left: 3px solid #e0a800;
+  border-radius: var(--border-radius);
+  background: #fff3cd;
+  color: #664d03;
+  font-size: 13px;
+
+  .icon {
+    flex: 0 0 auto;
+  }
+}
+
+.ReadPermissionDiscussionModal-form {
+  > .Form-group + .Form-group {
+    margin-top: 12px;
+  }
+}
+
 .ReadPermissionDiscussionModal .Modal-content{
   overflow: visible;
 }

@@ -1,14 +1,14 @@
 import app from 'flarum/admin/app';
 import {extend} from 'flarum/common/extend';
-import EditGroupModal from "flarum/admin/components/EditGroupModal";
-import Model from "flarum/common/Model";
-import Group from "flarum/common/models/Group";
+import EditGroupModal from 'flarum/admin/components/EditGroupModal';
+import Stream from 'flarum/common/utils/Stream';
+
 app.initializers.add('nodeloc/flarum-ext-read-permission', () => {
-  Group.prototype.readPermission = Model.attribute('readPermission');
-  extend(EditGroupModal.prototype, 'fields', function(items) {
-    this.readPermission = this.group.readPermission() || '';
-    // add item before hidden label and after icon
-    items.replace('hidden', null, 5);
+  extend(EditGroupModal.prototype, 'oninit', function () {
+    this.readPermission = Stream(this.group.attribute('readPermission') ?? 0);
+  });
+
+  extend(EditGroupModal.prototype, 'fields', function (items) {
     items.add(
       'readPermission',
       <div className="Form-group">
@@ -16,18 +16,19 @@ app.initializers.add('nodeloc/flarum-ext-read-permission', () => {
         <div className="helpText">
           {app.translator.trans('nodeloc-read-permission.admin.readPermissionHelper')}
         </div>
-        <input className="FormControl"
-          name="readPermission"
+        <input
+          className="FormControl"
           type="number"
-          placeholder='0'
-          value={this.group.readPermission()}
+          min="0"
+          step="1"
+          bidi={this.readPermission}
         />
       </div>,
-      10
+      5
     );
   });
-  extend(EditGroupModal.prototype, 'submitData', function(data) {
-    data.readPermission = $('input[name="readPermission"]').val();
-  });
 
+  extend(EditGroupModal.prototype, 'submitData', function (data) {
+    data.readPermission = Math.max(0, parseInt(this.readPermission(), 10) || 0);
+  });
 });

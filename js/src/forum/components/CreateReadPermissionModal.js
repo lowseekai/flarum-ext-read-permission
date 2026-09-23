@@ -1,28 +1,24 @@
 import app from 'flarum/forum/app';
 
 import Button from 'flarum/common/components/Button';
+import Icon from 'flarum/common/components/Icon';
 import Modal from 'flarum/common/components/Modal';
-import Switch from 'flarum/common/components/Switch';
-import ItemList from 'flarum/common/utils/ItemList';
-import Stream from 'flarum/common/utils/Stream';
-import extractText from 'flarum/common/utils/extractText';
-import Select from "flarum/common/components/Select";
 import Dropdown from 'flarum/common/components/Dropdown';
-import icon from 'flarum/common/helpers/icon';
 import Group from 'flarum/common/models/Group';
 
 export default class CreateReadPermissionModal extends Modal {
   oninit(vnode) {
     super.oninit(vnode);
-    if(this.attrs.selectGroup){
-      this.group = this.attrs.selectGroup;
-    }else{
-      this.group = app.store.getById('groups', Group.MEMBER_ID);
-    }
+    this.group =
+      this.attrs.selectGroup ||
+      app.store.getById('groups', Group.MEMBER_ID) ||
+      app.store.all('groups').find((group) => group.id() === Group.MEMBER_ID);
   }
 
   title() {
-    return app.translator.trans('nodeloc-read-permission.forum.modal.add_title');
+    return app.translator.trans(
+      `nodeloc-read-permission.forum.modal.${this.attrs.selectGroup ? 'edit' : 'add'}_title`
+    );
   }
 
   className() {
@@ -32,80 +28,100 @@ export default class CreateReadPermissionModal extends Modal {
   content() {
     return [
       <div className="Modal-body">
-        <div className="ReadPermissionDiscussionModal-form">{this.fields().toArray()}</div>
+        <div className="ReadPermissionDiscussionModal-form">{this.fields()}</div>
       </div>,
     ];
   }
 
   fields() {
-    const items = new ItemList();
     const icons = {
-      3: 'fas fa-user',
+      [Group.ADMINISTRATOR_ID]: 'fas fa-user-shield',
+      [Group.MEMBER_ID]: 'fas fa-user',
+      [Group.GUEST_ID]: 'fas fa-user-slash',
     };
-    items.add(
-      'readPermission',
+    const groups = app.store
+      .all('groups')
+      .filter((group) => group.id() !== Group.GUEST_ID)
+      .sort((a, b) => this.permissionFor(a) - this.permissionFor(b));
+
+    return [
       <div className="Form-group">
-        <label
-          className="label">{app.translator.trans('nodeloc-read-permission.forum.modal.readPermission_placeholder')}</label>
-        <Dropdown label={[icon(this.group.icon() || icons[this.group.id()]), '\t', this.group.namePlural(), ' - ', this.group.data.attributes.readPermission]} buttonClassName="Button Button--danger">
-        {app.store
-          .all('groups')
-          .filter((g) => g.id() != 2)
-          .sort((a, b) => a.data.attributes.readPermission - b.data.attributes.readPermission)
-          .map((g) =>
-            Button.component(
-              {
-                active: this.group.id() === g.id(),
-                icon: g.icon() || icons[g.id()],
-                onclick: () => {
-                  this.group = g; // 更新 group 的值为当前被点击的组
-                },
-              },
-              [g.namePlural(), ' - ', g.data.attributes.readPermission] // 在组名和 read_permission 之间添加文字
-              )
-          )}
+        <label className="label">
+          {app.translator.trans('nodeloc-read-permission.forum.modal.readPermission_placeholder')}
+        </label>
+        <Dropdown
+          label={this.group ? this.groupLabel(this.group, icons) : app.translator.trans('nodeloc-read-permission.forum.modal.no_groups')}
+          buttonClassName="Button Button--danger"
+        >
+          {groups.map((group) => (
+            <Button
+              active={this.group?.id() === group.id()}
+              icon={group.icon() || icons[group.id()]}
+              onclick={() => {
+                this.group = group;
+                m.redraw();
+              }}
+            >
+              {this.groupLabel(group, icons, false)}
+            </Button>
+          ))}
         </Dropdown>
       </div>,
-      100
-    );
-
-    items.add(
-      'submit',
       <div className="Form-group">
-        {Button.component(
-          {
-            type: 'submit',
-            className: 'Button Button--primary ReadPermissionModal-SubmitButton',
-            loading: this.loading,
-          },
-          app.translator.trans('nodeloc-read-permission.forum.modal.submit')
-        )}
+        <Button
+          type="button"
+          className="Button Button--primary ReadPermissionModal-SubmitButton"
+          loading={this.loading}
+          onclick={this.onsubmit.bind(this)}
+        >
+          {app.translator.trans('nodeloc-read-permission.forum.modal.submit')}
+        </Button>
       </div>,
-      -10
-    );
-    return items;
+    ];
+  }
+
+  permissionFor(group) {
+    return Number(group.attribute('readPermission') ?? 0);
+  }
+
+  groupLabel(group, icons, includeIcon = true) {
+    const label = [group.namePlural(), ' - ', this.permissionFor(group)];
+
+    return includeIcon
+      ? [<Icon name={group.icon() || icons[group.id()]} />, ' ', label]
+      : label;
   }
 
   onsubmit(e) {
-    e.preventDefault();
+    e?.preventDefault();
+    e?.stopPropagation();
 
     const data = this.group;
 
-    if (data === null) {
+    if (!data) {
       return;
     }
-    const promise = this.attrs.onsubmit(data);
+    try {
+      const result = this.attrs.onsubmit(data);
 
-    if (promise instanceof Promise) {
+      if (!result || typeof result.then !== 'function') {
+        this.hide();
+        return;
+      }
+
       this.loading = true;
-
-      promise.then(this.hide.bind(this), (err) => {
-        console.error(err);
-        this.onerror(err);
-        this.loaded();
-      });
-    } else {
-      app.modal.close();
+      Promise.resolve(result).then(
+        () => this.hide(),
+        (err) => {
+          console.error(err);
+          this.onerror(err);
+          this.loaded();
+        }
+      );
+    } catch (err) {
+      console.error(err);
+      this.onerror(err);
+      this.loaded();
     }
   }
 }
